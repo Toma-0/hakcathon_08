@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 
 //残高と推しの名前、ユーザーネーム、アイコン等を表示
@@ -29,11 +27,11 @@ class ATM extends StatefulWidget {
 }
 
 class _ATMState extends State<ATM> {
-  int ATMNumber = 0;
+  int ATMNumber =0;
 
   void OpenATM() {
     setState(() {
-      ATMNumber = 1;
+      ATMNumber =1;
     });
   }
 
@@ -43,8 +41,9 @@ class _ATMState extends State<ATM> {
       child: TextButton(
           onPressed: () {
             OpenATM();
+            print(ATMNumber);
           },
-          child: Image.asset("images/$ATMNumber.png")),
+          child: Image.asset("images/C_ATM$ATMNumber.PNG")),
     );
   }
 }
