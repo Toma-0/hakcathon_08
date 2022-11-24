@@ -26,9 +26,6 @@ class _ATMState extends State<ATM> with SingleTickerProviderStateMixin {
   Widget creatCard(name, number, c, BuildContext context) {
     SizeConfig().init(context);
     return TextButton(
-      style: TextButton.styleFrom(
-        
-      ),
       onPressed: () {
         //画面遷移
       },
@@ -146,13 +143,18 @@ class _ATMState extends State<ATM> with SingleTickerProviderStateMixin {
                       Padding(padding: EdgeInsets.only(left: 10)),
                       Text("ユーザー名"), //ユーザーネーム
 
-                      Padding(padding: EdgeInsets.only(left: 200)),
+                      Padding(padding: EdgeInsets.only(left: 250)),
                       SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: IconButton(
+                        width: 40,
+                        height: 40,
+                        child: ElevatedButton(
                           onPressed: () {},
-                          icon: Icon(Icons.settings),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Image.asset("images/ATM.PNG"),
                         ),
                       ),
                     ],
@@ -174,4 +176,3 @@ class _ATMState extends State<ATM> with SingleTickerProviderStateMixin {
     );
   }
 }
-
