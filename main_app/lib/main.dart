@@ -1,178 +1,128 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import './config/size_config.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:flutter/services.dart';
 
-void main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(MaterialApp(home: ATM()));
-}
+void main() => runApp(MyApp());
 
-
-class ATM extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _ATMState createState() => _ATMState();
+  Widget build(BuildContext context) {
+    // システムバー・ナビゲーションバーの色
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarDividerColor: Colors.grey,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
+    return MaterialApp(
+      debugShowCheckedModeBanner: false, // DEBUGバナー削除
+      title: 'Wave Animation',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: WaveView(),
+    );
+  }
 }
 
-class _ATMState extends State<ATM> with SingleTickerProviderStateMixin {
-  bool sliderClose = true;
-  double t = 150;
+class WaveView extends StatefulWidget {
+  @override
+  _WaveViewState createState() => _WaveViewState();
+}
 
-  Widget creatCard(name, number, c, BuildContext context) {
-    SizeConfig().init(context);
-    return TextButton(
-      onPressed: () {
-        //画面遷移
-      },
-      child: Card(
-        elevation: 0,
-        color: Color.fromARGB(255, 241, 241, 241),
-        child: Container(
-          width: 70,
-          height: 70,
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("images/oshi$number.PNG"),
-                colorFilter: ColorFilter.mode(c, BlendMode.srcIn),
-                scale: 10,
-                fit: BoxFit.none,
-              ),
-            ),
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: Text(name),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+class _WaveViewState extends v {
+  late AnimationController waveController; // AnimationControllerの宣言
+  static const darkBlue = Color.fromARGB(255, 131, 132, 133); // 波の色
+
+  @override
+  void initState() {
+    waveController = AnimationController(
+      duration: const Duration(seconds: 3), // アニメーションの間隔を3秒に設定
+      vsync: this, // おきまり
+    )..repeat(); // リピート設定
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    waveController.dispose(); // AnimationControllerは明示的にdisposeする。
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig().init(context);
     return Scaffold(
-      body: SlidingUpPanel(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Color.fromARGB(255, 141, 141, 141)),
-        minHeight: 50,
-        maxHeight: 250,
-        onPanelOpened: () {
-          setState(() {
-            t = 0;
-          });
-        },
-        onPanelClosed: () {
-          setState(() {
-            t = 150;
-          });
-        },
-        panel: Container(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 17),
-              ),
-              Card(
-                child: Container(
-                  color: Color.fromARGB(255, 176, 175, 175),
-                  width: 70,
-                  height: 5,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 17),
-              ),
-              Container(
-                height: 196,
-                width: 400,
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: Color.fromARGB(255, 87, 87, 87)),
-                    left: BorderSide(color: Color.fromARGB(255, 87, 87, 87)),
-                    right: BorderSide(color: Color.fromARGB(255, 87, 87, 87)),
-                  ),
-                  //追加
-                ),
-                child: Container(
-                  color: Color.fromARGB(255, 241, 241, 241),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 10),
-                      ),
-                      creatCard("うい", 0, Colors.red, context),
-                      Padding(
-                        padding: EdgeInsets.only(right: 10),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+      body: Container(
+        clipBehavior: Clip.antiAlias,
+      decoration:BoxDecoration(
+        shape: BoxShape.circle,
+      color: Colors.white,
+      ),
+      child:AnimatedBuilder(
+        animation: waveController, // waveControllerを設定
+        builder: (context, child) => Stack(
+          children: <Widget>[
+            // 1つ目の波
+            ClipPath(
+              child: Container(color: darkBlue),
+              clipper: WaveClipper(context, waveController.value, 0),
+            ),
+            // 2つ目の波
+            ClipPath(
+              child: Container(color: darkBlue.withOpacity(0.6)),
+              clipper: WaveClipper(context, waveController.value, 0.5),
+            ),
+          ],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Padding(
-                child: Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(padding: EdgeInsets.only(left: 20)),
-                      Container(
-                        height: 50,
-                        width: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: AssetImage("images/black.jpeg"),
-                          ),
-                        ),
-                      ),
-                      Padding(padding: EdgeInsets.only(left: 10)),
-                      Text("ユーザー名"), //ユーザーネーム
-
-                      Padding(padding: EdgeInsets.only(left: 250)),
-                      SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Image.asset("images/ATM.PNG"),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                padding: EdgeInsets.only(top: 50, bottom: 50),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: t),
-                child: Image.asset("images/C_ATM0.PNG"),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 50),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
+}
+
+class WaveClipper extends CustomClipper<Path> {
+  WaveClipper(this.context, this.waveControllerValue, this.offset) {
+    final width = MediaQuery.of(context).size.width; // 画面の横幅
+    final height = MediaQuery.of(context).size.height; // 画面の高さ
+    
+
+    // coordinateListに波の座標を追加
+    for (var i = 0; i <= width / 3; i++) {
+      final step = (i / width) - waveControllerValue;
+      coordinateList.add(
+        Offset(
+          i.toDouble() * 3, // X座標
+          height*0.5-math.sin(step * 2 * math.pi - offset) * 45,// Y座標
+        ),
+      );
+
+    
+    }
+  }
+
+  final BuildContext context;
+  final double waveControllerValue; // waveController.valueの値
+  final double offset; // 波のずれ
+  final List<Offset> coordinateList = []; // 波の座標のリスト
+
+  @override
+  Path getClip(Size size) {
+    final path = Path()
+      // addPolygon: coordinateListに入っている座標を直線で結ぶ。
+      //             false -> 最後に始点に戻らない
+      ..addPolygon(coordinateList, false)
+      ..lineTo(size.width, 0.0) // 画面右下へ
+      ..lineTo(0, 0.0) // 画面左下へ
+      ..close(); // 始点に戻る
+    return path;
+  }
+
+  // 再クリップするタイミング -> animationValueが更新されていたとき
+  @override
+  bool shouldReclip(WaveClipper oldClipper) =>
+      waveControllerValue != oldClipper.waveControllerValue;
 }
